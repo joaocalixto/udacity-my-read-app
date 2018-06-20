@@ -1,21 +1,15 @@
-import React, {Component} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import './App.css'
 
-class Book extends Component{
     
-    static propTypes = {
-        book: PropTypes.object.isRequired,
-        onChangeShelf: PropTypes.func.isRequired,
-    }
 
-    render(){
-        const {book, onChangeShelf} = this.props
+    const Book = ({ book,  onChangeShelf}) => { 
         return (
             <li>
                 <div className="book">
                     <div className="book-top">
-                    <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
+                    <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks ? book.imageLinks.thumbnail : ''})` }}></div>
                     <div className="book-shelf-changer">
                         <select value={book.shelf ? book.shelf : "none"} onChange={(event) => {
                                 onChangeShelf(book, event.target.value)
@@ -34,6 +28,12 @@ class Book extends Component{
             </li>
         )
     }
-}
+
+    Book.propTypes = {
+        book: PropTypes.object.isRequired,
+        onChangeShelf: PropTypes.func.isRequired,
+    }
+
+
 
 export default Book

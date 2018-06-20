@@ -1,11 +1,11 @@
 import React from 'react'
-import './App.css'
+import {Route, Switch} from 'react-router-dom';
 import * as BooksAPI from './utils/BooksAPI'
 import ListBooksHeader from './ListBooksHeader';
 import SearchBooks from './SearchBooks'; 
 import ListShelf from './ListShelf';
-import {Route} from 'react-router-dom';
 import AddBook from './AddBook';
+import './App.css'
 
 class BooksApp extends React.Component {
   state = {
@@ -21,17 +21,29 @@ class BooksApp extends React.Component {
 
   updateSearchBooks(query){
     console.log("wuer = "+query);
-    BooksAPI.search(query)
-    .then(booksSearch => {
-      if(booksSearch)
-        this.setState({booksSearch})
+    BooksAPI.search(query,30).then((books) => {
+      if(!!books){
+        if(books.length>0){
+          const booksSearch = books.map((book) => {
+            const existingBook = this.state.books.find((b) => b.id === book.id)
+            book.shelf = !!existingBook ? existingBook.shelf : 'none'
+            return book
+          });
+          this.setState({ booksSearch })
+        }  
+      }
     })
   }
 
   changeShelf(book, shelf){
     console.log("changed to "+ shelf);
-    BooksAPI.update(book, shelf)
-    .then(this.refresh());
+    BooksAPI.update(book, shelf).then(() => {
+      book.shelf = shelf        
+      this.setState(state => ({
+        books: state.books.filter(b => b.id !== book.id).concat(book)
+      }))     
+    })
+
   }
 
   refresh(){
@@ -44,6 +56,7 @@ class BooksApp extends React.Component {
   render() {
     return (
       <div className="app">
+        <Switch>
         <Route path='/search' render={() => (
             <SearchBooks
               booksSearch={(this.state.booksSearch)}
@@ -67,7 +80,7 @@ class BooksApp extends React.Component {
             <AddBook/>
         </div>
         )}/>
-          
+        </Switch>
       </div>
     )
   }
